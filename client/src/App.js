@@ -1,60 +1,73 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import data from "./data";
+import { useDispatch, useSelector } from "react-redux";
+import { BrowserRouter, Route, Link } from "react-router-dom";
+import { signout } from "./actions/userActions";
+import CartScreen from "./screens/CartScreen";
+
+import HomeScreen from "./screens/HomeScreen";
+import PaymentMethodScreen from "./screens/PaymentMethodScreen";
+import PlaceOrderScreen from "./screens/PlaceOrderScreen";
+import ProductScreen from "./screens/ProductScreen";
+import RegisterScreen from "./screens/RegisterScreen";
+import ShippingAddressScreen from "./screens/ShippingAddressScreen";
+import SigninScreen from "./screens/SigninScreen";
 function App() {
+  const cart = useSelector((state) => state.cart);
+  const { cartItems } = cart;
+  const userSignin = useSelector((state) => state.userSignin);
+  const { userInfo } = userSignin;
+
+  const dispatch = useDispatch();
+
+  const signoutHandler = () => {
+    dispatch(signout());
+  };
+
   return (
-    <div className="grid-container">
-      <header className="row">
-        <div>
-          <Link to="/" className="brand">
-            Ecommerce-App
-          </Link>
-        </div>
-        <div>
-          <Link to="/cart">Cart</Link>
-          <Link to="/sigin">Signin</Link>
-        </div>
-      </header>
-      <main>
-        <div className="row center">
-          {data.products.map((product) => (
-            <div key={product._id} className="card">
-              <Link to={`/product/${product._id}`}>
-                <img
-                  className="medium"
-                  src={product.image}
-                  alt={product.name}
-                />
-              </Link>
-              <div className="card-body">
-                <Link to="product.html">
-                  <h2>{product.name}</h2>
+    <BrowserRouter>
+      <div className="grid-container">
+        <header className="row">
+          <div>
+            <Link to="/" className="brand">
+              Ecommerce-App
+            </Link>
+          </div>
+          <div>
+            <Link to="/cart">
+              Cart{" "}
+              {cartItems.length > 0 && (
+                <span className="badge"> {cartItems.length}</span>
+              )}
+            </Link>
+            {userInfo ? (
+              <div className="dropdown">
+                <Link to="#">
+                  {userInfo.name} <i className="fa fa-caret-down"></i>{" "}
                 </Link>
-                <div className="rating">
-                  <span>
-                    <i className="fa fa-star"></i>
-                  </span>
-                  <span>
-                    <i className="fa fa-star"></i>
-                  </span>
-                  <span>
-                    <i className="fa fa-star"></i>
-                  </span>
-                  <span>
-                    <i className="fa fa-star"></i>
-                  </span>
-                  <span>
-                    <i className="fa fa-star"></i>
-                  </span>
-                </div>
-                <div className="price">${product.price}</div>
+                <ul className="dropdown-content">
+                  <Link to="#signout" onClick={signoutHandler}>
+                    Sign out
+                  </Link>
+                </ul>
               </div>
-            </div>
-          ))}
-        </div>
-      </main>
-      <footer className="row center">All Rights Reserved</footer>
-    </div>
+            ) : (
+              <Link to="/signin">Signin</Link>
+            )}
+          </div>
+        </header>
+        <main>
+          <Route path="/cart/:id?" component={CartScreen} />
+          <Route path="/product/:id" component={ProductScreen} />
+          <Route path="/signin" component={SigninScreen} />
+          <Route path="/register" component={RegisterScreen} />
+          <Route path="/shipping" component={ShippingAddressScreen} />
+          <Route path="/payment" component={PaymentMethodScreen} />
+          <Route path="/placeOrder" component={PlaceOrderScreen} />
+          <Route exact path="/" component={HomeScreen} />
+        </main>
+        <footer className="row center">All Rights Reserved</footer>
+      </div>
+    </BrowserRouter>
   );
 }
 
