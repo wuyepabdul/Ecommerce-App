@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { PayPalButton } from "react-paypal-button-v2";
+
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import LoadingBox from "../components/screen/LoadingBox";
@@ -163,7 +164,7 @@ function OrderScreen(props) {
                     <LoadingBox></LoadingBox>
                   ) : (
                     <PayPalButton
-                      amounnt={order.totalPrice}
+                      amount={order.totalPrice}
                       onSuccess={successPaymentHandler}
                     ></PayPalButton>
                   )}
