@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import userRouter from "./routes/userRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import dotenv from "dotenv";
+import orderRouter from "./routes/orderRoute.js";
 
 dotenv.config();
 
@@ -25,6 +26,10 @@ mongoose.connect(
 
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
+app.use("/api/orders", orderRouter);
+app.use("/api/config/paypal", (req, res) => {
+  res.json(process.env.PAYPAL_CLIENT_ID || "sb");
+});
 
 app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
