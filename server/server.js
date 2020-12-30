@@ -27,7 +27,7 @@ mongoose.connect(
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/orders", orderRouter);
-app.use("/api/config/paypal", (req, res) => {
+app.get("/api/config/paypal", (req, res) => {
   res.json(process.env.PAYPAL_CLIENT_ID || "sb");
 });
 
