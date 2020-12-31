@@ -5,14 +5,24 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import LoadingBox from "../components/screen/LoadingBox";
 import MessageBox from "../components/screen/MessageBox";
-import { detailsOrder } from "../actions/orderActions";
+import { getDetailsOrder, payOrder } from "../actions/orderActions";
 import Axios from "axios";
+import { ORDER_PAYMENT_RESET } from "../constants/orderConstants";
 
 function OrderScreen(props) {
   const orderId = props.match.params.id;
   const [sdkReady, setSdkReady] = useState(false);
+  /* order details state from redux */
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;
+  /* order payment state from redux */
+  const orderPayment = useSelector((state) => state.orderPayment);
+  const {
+    error: paymentError,
+    success: paymentSuccess,
+    loading: paymentLoading,
+  } = orderPayment;
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -27,9 +37,11 @@ function OrderScreen(props) {
       };
       document.body.appendChild(script); // adds scripts as the last child in the body of our html
     };
-    if (!order) {
-      //this means the order is not loaded, so load the order by dispatching detailsOrder
-      dispatch(detailsOrder(orderId));
+    if (!order || paymentSuccess || (order && order._id !== orderId)) {
+      //order && order._id !== orderId means order exist but order.id does not equal to orderID(url id)
+      //this means if order is not loaded, load the order by dispatching getDetailsOrder action or if payment is successful dispatch getDetailsOrder
+      dispatch({ type: ORDER_PAYMENT_RESET }); //prevents infinite ORDER_DETAILS_REQUEST and ORDER_DETAILS_SUCCESS loop in redux
+      dispatch(getDetailsOrder(orderId));
     } else {
       //we have order at this point
       if (!order.isPaid) {
@@ -43,9 +55,11 @@ function OrderScreen(props) {
         }
       }
     }
-  }, [orderId, order, sdkReady, dispatch]);
+  }, [orderId, order, sdkReady, dispatch, paymentSuccess]);
 
-  const successPaymentHandler = () => {};
+  const successPaymentHandler = (paymentResult) => {
+    dispatch(payOrder(order, paymentResult));
+  };
 
   return loading ? (
     <LoadingBox></LoadingBox>
@@ -163,10 +177,16 @@ function OrderScreen(props) {
                   {!sdkReady ? (
                     <LoadingBox></LoadingBox>
                   ) : (
-                    <PayPalButton
-                      amount={order.totalPrice}
-                      onSuccess={successPaymentHandler}
-                    ></PayPalButton>
+                    <>
+                      {paymentError && (
+                        <MessageBox variant="danger">{paymentError}</MessageBox>
+                      )}
+                      {paymentLoading && <LoadingBox></LoadingBox>}
+                      <PayPalButton
+                        amount={order.totalPrice}
+                        onSuccess={successPaymentHandler}
+                      ></PayPalButton>
+                    </>
                   )}
                 </li>
               )}

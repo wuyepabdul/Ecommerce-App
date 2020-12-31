@@ -88,9 +88,11 @@ function ShippingAddressScreen(props) {
             required
           />
         </div>
-        <button className="primary block" type="submit">
-          Continue
-        </button>
+        <div>
+          <button className="primary" type="submit">
+            Continue
+          </button>
+        </div>
       </form>
     </div>
   );
